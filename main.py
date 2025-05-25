@@ -1,30 +1,29 @@
 #!/usr/bin/env python3
 
 import i3ipc
-import time
 import re
 
 # from debug import print_i3_info
 
 
 CONFIG = {
-    "Code": {
-        "icon": "󰨞 ",
-        "name_regex": r"^(.+?)\s*[-—]\s*(?:Visual Studio Code|Code(?: - OSS)?)(?:.*)$",
+    'Code': {
+        'icon': '󰨞 ',
+        'name_regex': r'^(.+?)\s*[-—]\s*(?:Visual Studio Code|Code(?: - OSS)?)(?:.*)$',
     },
-    "Cursor": {
-        "icon": "󰇀",
-        "name_regex": r"^(.+?)\s*[-—]\s*Cursor(?:.*)$",
+    'Cursor': {
+        'icon': '󰇀',
+        'name_regex': r'^(.+?)\s*[-—]\s*Cursor(?:.*)$',
     },
-    "firefox": {
-        "icon": "󰈹 "
+    'firefox': {
+        'icon': '󰈹 '
     },
-    "kitty": {
-        "icon": " ",
-        "name_full": True,
+    'kitty': {
+        'icon': ' ',
+        'name_full': True,
     },
-    "TelegramDesktop": {
-        "icon": " "
+    'TelegramDesktop': {
+        'icon': ' '
     }
 }
 
@@ -32,13 +31,13 @@ COMPILED_CONFIG = {}
 
 for class_name, config_data in CONFIG.items():
     COMPILED_CONFIG[class_name] = {
-        "icon": config_data["icon"],
-        "name_regex": re.compile(config_data["name_regex"]) if "name_regex" in config_data else None,
-        "name_full": config_data.get("name_full", False)
+        'icon': config_data['icon'],
+        'name_regex': re.compile(config_data['name_regex']) if 'name_regex' in config_data else None,
+        'name_full': config_data.get('name_full', False)
     }
 
 
-def get_workspace_name(workspace, separator=" | "):
+def get_workspace_name(workspace, separator=' | '):
     leaves = workspace.leaves()
 
     if not leaves:
@@ -50,14 +49,14 @@ def get_workspace_name(workspace, separator=" | "):
         window_class = leaf.window_class
         window_name = leaf.name
 
-        app_representation = ""
+        app_representation = ''
         app_config_entry = COMPILED_CONFIG.get(window_class)
 
         if app_config_entry:
             icon = app_config_entry['icon']
-            final_name_part = ""
+            final_name_part = ''
 
-            if app_config_entry.get("name_full", False) and window_name:
+            if app_config_entry.get('name_full', False) and window_name:
                 final_name_part = window_name
             elif app_config_entry.get('name_regex') and window_name:
                 match = app_config_entry['name_regex'].search(window_name)
@@ -66,7 +65,7 @@ def get_workspace_name(workspace, separator=" | "):
                     final_name_part = match.group(1) if len(match.groups()) > 0 else match.group(0)
 
             if final_name_part:
-                app_representation = f"{icon} {final_name_part}"
+                app_representation = f'{icon} {final_name_part}'
             else:
                 app_representation = icon
         else:
@@ -78,7 +77,7 @@ def get_workspace_name(workspace, separator=" | "):
     if not apps:
         return str(workspace.num)
 
-    return f"{workspace.num}: {separator.join(apps)}"
+    return f'{workspace.num}: {separator.join(apps)}'
 
 
 def update_workspace_name(i3_connection, workspace):
@@ -87,8 +86,8 @@ def update_workspace_name(i3_connection, workspace):
 
     if current_name != target_name:
         print(f'Renaming workspace {workspace.num}')
-        print(f"    ├─ before: {current_name}")
-        print(f"    └─ after:  {target_name}")
+        print(f'    ├─ before: {current_name}')
+        print(f'    └─ after:  {target_name}')
         print()
 
         try:
@@ -96,12 +95,12 @@ def update_workspace_name(i3_connection, workspace):
         except i3ipc.CommandError as e:
             # This can happen if the old name is no longer valid (e.g., already renamed by another event)
             # or if the target name is identical after all (race condition with i3 state)
-            print(f"Could not rename workspace '{current_name}' to '{target_name}': {e}. Refreshing state may resolve this.")
+            print(f'Could not rename workspace "{current_name}" to "{target_name}": {e}. Refreshing state may resolve this.')
             # Attempt to rename using workspace number as a fallback for current name if it changed
             try:
                 i3_connection.command(f'rename workspace number {workspace.num} to "{target_name}"')
             except i3ipc.CommandError as e2:
-                print(f"Fallback rename for workspace number {workspace.num} to '{target_name}' also failed: {e2}")
+                print(f'Fallback rename for workspace number {workspace.num} to "{target_name}" also failed: {e2}')
 
 
 def update_all_workspace_names(i3_connection):
@@ -111,7 +110,7 @@ def update_all_workspace_names(i3_connection):
         for workspace in tree.workspaces():
             update_workspace_name(i3_connection, workspace)
     except Exception as e:
-        print(f"Error getting workspaces or updating names: {e}")
+        print(f'Error getting workspaces or updating names: {e}')
 
 
 def on_window_event(i3_connection, event):
@@ -133,5 +132,5 @@ def main():
     i3_connection.main()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
