@@ -23,9 +23,10 @@ def get_workspace_name(workspace, separator=" | "):
     apps = []
 
     for leaf in leaves:
-        if leaf.window_class:
-            icon = CLASS_ICON_MAP.get(leaf.window_class, leaf.window_class) # fall back to raw class string
-            apps.append(icon)
+        icon = CLASS_ICON_MAP.get(leaf.window_class, leaf.window_class)
+        app_name_with_icon = f'{icon} {leaf.name}'.strip()
+
+        apps.append(app_name_with_icon)
 
     if not apps:
         return str(workspace.num)
@@ -79,6 +80,7 @@ def main():
     i3_connection.on(i3ipc.Event.WINDOW_NEW, on_window_event)
     i3_connection.on(i3ipc.Event.WINDOW_CLOSE, on_window_event)
     i3_connection.on(i3ipc.Event.WINDOW_MOVE, on_window_event)
+    i3_connection.on(i3ipc.Event.WINDOW_TITLE, on_window_event)
 
     i3_connection.main()
 
