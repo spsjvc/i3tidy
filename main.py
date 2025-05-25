@@ -2,27 +2,35 @@
 
 import i3ipc
 import time
-
 from debug import print_i3_info
 
 
-def get_workspace_name(workspace, separator=" / "):
+CLASS_ICON_MAP = {
+    "Code": "󰨞 ",
+    "Cursor": "󰇀",
+    "firefox": "󰈹 ",
+    "kitty": " ",
+    "TelegramDesktop": " "
+}
+
+
+def get_workspace_name(workspace, separator=" | "):
     leaves = workspace.leaves()
 
     if not leaves:
         return str(workspace.num)
 
-    classes = []
+    apps = []
 
     for leaf in leaves:
         if leaf.window_class:
-            classes.append(leaf.window_class)
+            icon = CLASS_ICON_MAP.get(leaf.window_class, leaf.window_class) # fall back to raw class string
+            apps.append(icon)
 
-    if not classes:
+    if not apps:
         return str(workspace.num)
 
-    return f"{workspace.num}: {separator.join(classes)}"
-
+    return f"{workspace.num}: {separator.join(apps)}"
 
 def update_workspace_name(i3_connection, workspace):
     current_name = workspace.name
