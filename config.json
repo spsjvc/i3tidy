@@ -1,0 +1,20 @@
+{
+  "Code": {
+    "icon": "󰨞 ",
+    "name_regex": "^(.+?)\\s*[-—]\\s*(?:Visual Studio Code|Code(?: - OSS)?)(?:.*)$"
+  },
+  "Cursor": {
+    "icon": "󰇀",
+    "name_regex": "^(.+?)\\s*[-—]\\s*Cursor(?:.*)$"
+  },
+  "firefox": {
+    "icon": "󰈹 "
+  },
+  "kitty": {
+    "icon": " ",
+    "name_full": true
+  },
+  "TelegramDesktop": {
+    "icon": " "
+  }
+}

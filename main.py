@@ -1,40 +1,12 @@
 #!/usr/bin/env python3
 
 import i3ipc
-import re
 
+from config import load_config
 # from debug import print_i3_info
 
 
-CONFIG = {
-    'Code': {
-        'icon': '󰨞 ',
-        'name_regex': r'^(.+?)\s*[-—]\s*(?:Visual Studio Code|Code(?: - OSS)?)(?:.*)$',
-    },
-    'Cursor': {
-        'icon': '󰇀',
-        'name_regex': r'^(.+?)\s*[-—]\s*Cursor(?:.*)$',
-    },
-    'firefox': {
-        'icon': '󰈹 '
-    },
-    'kitty': {
-        'icon': ' ',
-        'name_full': True,
-    },
-    'TelegramDesktop': {
-        'icon': ' '
-    }
-}
-
-COMPILED_CONFIG = {}
-
-for class_name, config_data in CONFIG.items():
-    COMPILED_CONFIG[class_name] = {
-        'icon': config_data['icon'],
-        'name_regex': re.compile(config_data['name_regex']) if 'name_regex' in config_data else None,
-        'name_full': config_data.get('name_full', False)
-    }
+config = load_config()
 
 
 def get_workspace_name(workspace, separator=' | '):
@@ -50,7 +22,7 @@ def get_workspace_name(workspace, separator=' | '):
         window_name = leaf.name
 
         app_representation = ''
-        app_config_entry = COMPILED_CONFIG.get(window_class)
+        app_config_entry = config.get(window_class)
 
         if app_config_entry:
             icon = app_config_entry['icon']
