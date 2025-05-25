@@ -36,7 +36,8 @@ def get_workspace_name(workspace, separator=' | '):
                 if match:
                     final_name_part = match.group(1) if len(match.groups()) > 0 else match.group(0)
             elif icon is None:
-                final_name_part = window_class
+                window_class_alias = app_config_entry.get('class_alias')
+                final_name_part = window_class_alias if window_class_alias else window_class
 
             if final_name_part:
                 icon_with_padding = f'{icon} ' if icon else ''
