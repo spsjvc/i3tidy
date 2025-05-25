@@ -2,16 +2,40 @@
 
 import i3ipc
 import time
-from debug import print_i3_info
+import re
+
+# from debug import print_i3_info
 
 
-CLASS_ICON_MAP = {
-    "Code": "󰨞 ",
-    "Cursor": "󰇀",
-    "firefox": "󰈹 ",
-    "kitty": " ",
-    "TelegramDesktop": " "
+CONFIG = {
+    "Code": {
+        "icon": "󰨞 ",
+        "name_regex": r"^(.+?)\s*[-—]\s*(?:Visual Studio Code|Code(?: - OSS)?)(?:.*)$",
+    },
+    "Cursor": {
+        "icon": "󰇀",
+        "name_regex": r"^(.+?)\s*[-—]\s*Cursor(?:.*)$",
+    },
+    "firefox": {
+        "icon": "󰈹 "
+    },
+    "kitty": {
+        "icon": " ",
+        "name_full": True,
+    },
+    "TelegramDesktop": {
+        "icon": " "
+    }
 }
+
+COMPILED_CONFIG = {}
+
+for class_name, config_data in CONFIG.items():
+    COMPILED_CONFIG[class_name] = {
+        "icon": config_data["icon"],
+        "name_regex": re.compile(config_data["name_regex"]) if "name_regex" in config_data else None,
+        "name_full": config_data.get("name_full", False)
+    }
 
 
 def get_workspace_name(workspace, separator=" | "):
@@ -23,15 +47,39 @@ def get_workspace_name(workspace, separator=" | "):
     apps = []
 
     for leaf in leaves:
-        icon = CLASS_ICON_MAP.get(leaf.window_class, leaf.window_class)
-        app_name_with_icon = f'{icon} {leaf.name}'.strip()
+        window_class = leaf.window_class
+        window_name = leaf.name
 
-        apps.append(app_name_with_icon)
+        app_representation = ""
+        app_config_entry = COMPILED_CONFIG.get(window_class)
+
+        if app_config_entry:
+            icon = app_config_entry['icon']
+            final_name_part = ""
+
+            if app_config_entry.get("name_full", False) and window_name:
+                final_name_part = window_name
+            elif app_config_entry.get('name_regex') and window_name:
+                match = app_config_entry['name_regex'].search(window_name)
+
+                if match:
+                    final_name_part = match.group(1) if len(match.groups()) > 0 else match.group(0)
+
+            if final_name_part:
+                app_representation = f"{icon} {final_name_part}"
+            else:
+                app_representation = icon
+        else:
+            app_representation = f'{window_class}'
+
+        if app_representation:
+            apps.append(app_representation)
 
     if not apps:
         return str(workspace.num)
 
     return f"{workspace.num}: {separator.join(apps)}"
+
 
 def update_workspace_name(i3_connection, workspace):
     current_name = workspace.name
