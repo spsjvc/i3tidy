@@ -1,8 +1,9 @@
 import json
 import re
+import os
 
 
-def load_config(path='config.json'):
+def load_config(path=os.path.expanduser('~/.config/i3tidy/config.json')):
     try:
         config = {}
 
