@@ -5,7 +5,9 @@ import os
 
 def load_config(path=os.path.expanduser('~/.config/i3tidy/config.json')):
     try:
-        config = {}
+        config = {
+            '__separator': ' | '
+        }
 
         with open(path, 'r') as file:
             for class_name, config_data in json.load(file).items():

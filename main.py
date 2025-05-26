@@ -2,58 +2,7 @@
 
 import i3ipc
 
-from config import load_config
-# from debug import print_i3_info
-
-
-config = load_config()
-
-
-def get_workspace_name(workspace, separator=' | '):
-    leaves = workspace.leaves()
-
-    if not leaves:
-        return str(workspace.num)
-
-    apps = []
-
-    for leaf in leaves:
-        window_class = leaf.window_class
-        window_name = leaf.name
-
-        app_representation = ''
-        app_config_entry = config.get(window_class)
-
-        if app_config_entry:
-            icon = app_config_entry['icon']
-            final_name_part = ''
-
-            if app_config_entry.get('name_full', False) and window_name:
-                final_name_part = window_name
-            elif app_config_entry.get('name_regex') and window_name:
-                match = app_config_entry['name_regex'].search(window_name)
-
-                if match:
-                    final_name_part = match.group(1) if len(match.groups()) > 0 else match.group(0)
-            elif icon is None:
-                window_class_alias = app_config_entry.get('class_alias')
-                final_name_part = window_class_alias if window_class_alias else window_class
-
-            if final_name_part:
-                icon_with_padding = f'{icon} ' if icon else ''
-                app_representation = f'{icon_with_padding}{final_name_part}'
-            else:
-                app_representation = icon
-        else:
-            app_representation = f'{window_class}'
-
-        if app_representation:
-            apps.append(app_representation)
-
-    if not apps:
-        return str(workspace.num)
-
-    return f'{workspace.num}: {separator.join(apps)}'
+from src.get_workspace_name import get_workspace_name
 
 
 def update_workspace_name(i3_connection, workspace):
@@ -79,7 +28,7 @@ def update_workspace_name(i3_connection, workspace):
                 print(f'Fallback rename for workspace number {workspace.num} to "{target_name}" also failed: {e2}')
 
 
-def update_all_workspace_names(i3_connection):
+def update(i3_connection):
     try:
         tree = i3_connection.get_tree()
 
@@ -90,15 +39,13 @@ def update_all_workspace_names(i3_connection):
 
 
 def on_window_event(i3_connection, event):
-    # print_i3_info(i3_connection)
-    update_all_workspace_names(i3_connection)
+    update(i3_connection)
 
 
 def main():
     i3_connection = i3ipc.Connection()
 
-    # print_i3_info(i3_connection)
-    update_all_workspace_names(i3_connection)
+    update(i3_connection)
 
     i3_connection.on(i3ipc.Event.WINDOW_NEW, on_window_event)
     i3_connection.on(i3ipc.Event.WINDOW_CLOSE, on_window_event)
